@@ -20,7 +20,7 @@ mvn spring-boot:run
 Сервис поднимается на `http://localhost:8080`.
 
 H2-консоль: `http://localhost:8080/h2-console`  
-JDBC URL: `jdbc:h2:mem:creditsdb`
+JDBC URL: `jdbc:h2:mem:creditsdb;LOCK_TIMEOUT=10000` (в H2 2.x MVStore уже обеспечивает multi-versioning)
 
 ## Предзаполненные аккаунты
 

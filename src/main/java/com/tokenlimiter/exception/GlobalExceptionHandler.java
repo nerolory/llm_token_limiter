@@ -67,6 +67,16 @@ public class GlobalExceptionHandler {
                     request,
                     problem -> problem.setProperty("targetModel", ime.getTargetModel()));
 
+            case IllegalArgumentException iae -> buildResponse(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Invalid Model",
+                    INVALID_MODEL_TYPE,
+                    iae.getMessage() != null
+                            ? iae.getMessage()
+                            : "Unsupported target model",
+                    request,
+                    problem -> {});
+
             case MethodArgumentNotValidException validEx -> buildValidationResponse(validEx, request);
 
             default -> {

@@ -38,9 +38,13 @@ public class JTokkitTokenEstimationService implements TokenEstimationService {
      */
     @Override
     public EstimateTokensResponse estimateTokens(EstimateTokensRequest request) {
-        Encoding encoding = resolveEncoding(request.targetModel());
-        int tokenCount = encoding.countTokens(request.inputText());
-        return new EstimateTokensResponse((long) tokenCount, request.targetModel());
+        try {
+            Encoding encoding = resolveEncoding(request.targetModel());
+            int tokenCount = encoding.countTokens(request.inputText());
+            return new EstimateTokensResponse((long) tokenCount, request.targetModel());
+        } catch (IllegalArgumentException ex) {
+            throw unsupportedModel(request.targetModel());
+        }
     }
 
     /**

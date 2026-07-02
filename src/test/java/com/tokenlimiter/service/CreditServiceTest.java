@@ -3,6 +3,7 @@ package com.tokenlimiter.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -73,16 +74,19 @@ class CreditServiceTest {
         when(userAccountRepository.findByUserIdForUpdate("user-uuid-9999"))
                 .thenReturn(Optional.of(account));
 
-        ConsumeCreditsRequest request = new ConsumeCreditsRequest("user-uuid-9999", 10L);
+        ConsumeCreditsRequest request = new ConsumeCreditsRequest("user-uuid-9999", 1L);
 
         assertThatThrownBy(() -> creditService.consumeCredits(request))
                 .isInstanceOf(InsufficientCreditsException.class)
                 .satisfies(ex -> {
                     InsufficientCreditsException ice = (InsufficientCreditsException) ex;
                     assertThat(ice.getUserId()).isEqualTo("user-uuid-9999");
-                    assertThat(ice.getRequestedTokens()).isEqualTo(10L);
+                    assertThat(ice.getRequestedTokens()).isEqualTo(1L);
                     assertThat(ice.getAvailableTokens()).isEqualTo(0L);
                 });
+
+        verify(userAccountRepository, never()).save(any());
+        verify(tokenTransactionRepository, never()).save(any());
     }
 
     @Test

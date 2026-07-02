@@ -55,7 +55,7 @@ class CreditControllerIntegrationTest {
 
     @Test
     void consumeCredits_shouldReturn402_whenInsufficientBalance() throws Exception {
-        ConsumeCreditsRequest request = new ConsumeCreditsRequest("user-uuid-9999", 10L);
+        ConsumeCreditsRequest request = new ConsumeCreditsRequest("user-uuid-9999", 1L);
 
         mockMvc.perform(post("/api/v1/credits/consume")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -63,6 +63,30 @@ class CreditControllerIntegrationTest {
                 .andExpect(status().isPaymentRequired())
                 .andExpect(jsonPath("$.title", is("Insufficient Credits")))
                 .andExpect(jsonPath("$.status", is(402)));
+    }
+
+    @Test
+    void consumeCredits_shouldReturn422_whenZeroTokensRequested() throws Exception {
+        String invalidPayload = "{\"userId\": \"user-uuid-8888\", \"tokensRequested\": 0}";
+
+        mockMvc.perform(post("/api/v1/credits/consume")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(invalidPayload))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.title", is("Validation Error")))
+                .andExpect(jsonPath("$.status", is(422)));
+    }
+
+    @Test
+    void estimateTokens_shouldReturn422_whenModelIsUnknown() throws Exception {
+        EstimateTokensRequest request = new EstimateTokensRequest("Hello world", "gpt-unknown");
+
+        mockMvc.perform(post("/api/v1/credits/estimate")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.title", is("Invalid Model")))
+                .andExpect(jsonPath("$.status", is(422)));
     }
 
     @Test
